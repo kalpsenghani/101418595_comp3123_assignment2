@@ -1,0 +1,51 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_BACKEND_URL=http://backend:5000
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - '5000:5000'
+    depends_on:
+      - mongodb
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/mydatabase
+    networks:
+      - app-network
+
+  mongodb:
+    image: mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - app-network
+
+  mongo-express:
+    image: mongo-express:latest
+    ports:
+      - '8081:8081'
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+    depends_on:
+      - mongodb
+
+volumes:
+  mongodb-data:
+
+networks:
+  app-network:
+    driver: bridge
